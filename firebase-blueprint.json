@@ -1,0 +1,320 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents a teacher or administrator in the system.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "displayNameAr": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "specialty_manager", "teacher"] },
+        "specialties": { "type": "array", "items": { "type": "string" }, "description": "Specialties managed by this user if they are a specialty manager." }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Specialty": {
+      "title": "Specialty",
+      "description": "A pedagogical specialty within the department.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "levelType": { "type": "string", "enum": ["license", "master"] }
+      },
+      "required": ["id", "name", "levelType"]
+    },
+    "Level": {
+      "title": "Level",
+      "description": "A specific year/level within a specialty (e.g., 2nd year License).",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "specialtyId": { "type": "string" }
+      },
+      "required": ["id", "name", "specialtyId"]
+    },
+    "Module": {
+      "title": "Module",
+      "description": "A teaching module (subject) belonging to a level and specialty.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "levelId": { "type": "string" },
+        "specialtyId": { "type": "string" }
+      },
+      "required": ["id", "name", "levelId", "specialtyId"]
+    },
+    "Schedule": {
+      "title": "Schedule",
+      "description": "Imported schedule data (Semester, Invigilator, or Teacher specific).",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["semester", "invigilator", "teacher"] },
+        "fileUrl": { "type": "string" },
+        "fileName": { "type": "string" },
+        "uploadedAt": { "type": "string", "format": "date-time" },
+        "data": { "type": "array", "items": { "type": "object" }, "description": "Extracted JSON data from PDF." }
+      },
+      "required": ["id", "type", "uploadedAt"]
+    },
+    "Calendar": {
+      "title": "Calendar",
+      "description": "Teaching calendar configuration.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "semesterStart": { "type": "string", "format": "date" },
+        "semesterEnd": { "type": "string", "format": "date" },
+        "holidays": { "type": "array", "items": { "type": "string", "format": "date" } },
+        "excludedDays": { "type": "array", "items": { "type": "string", "format": "date" } }
+      },
+      "required": ["id", "semesterStart", "semesterEnd"]
+    },
+    "Session": {
+      "title": "Session",
+      "description": "A single teaching session instance.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "module": { "type": "string" },
+        "specialtyId": { "type": "string" },
+        "levelId": { "type": "string" },
+        "group": { "type": "string" },
+        "day": { "type": "string" },
+        "time": { "type": "string" },
+        "room": { "type": "string" },
+        "type": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "status": { "type": "string", "enum": ["pending", "taught", "missed", "problem", "internship", "sick"] },
+        "problemType": { "type": "string", "enum": ["group_absence", "majority_absence", "lack_of_means", "room_problem", "student_delay", "teacher_delay", "organizational", "other"] },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "teacherId", "date", "status"]
+    },
+    "Compensation": {
+      "title": "Compensation",
+      "description": "A compensation opportunity for a missed session.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "sessionId": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "status": { "type": "string", "enum": ["available", "reserved", "approved", "cancelled"] },
+        "date": { "type": "string", "format": "date" },
+        "time": { "type": "string" },
+        "room": { "type": "string" }
+      },
+      "required": ["id", "sessionId", "status"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "A graduation project (PFE).",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "levelId": { "type": "string" },
+        "specialtyId": { "type": "string" },
+        "students": { "type": "array", "items": { "type": "string" } },
+        "supervisorId": { "type": "string" },
+        "keywords": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string", "enum": ["proposed", "accepted", "rejected", "distributed"] },
+        "progress": { "type": "number" },
+        "stage": { "type": "string", "enum": ["start", "references", "theory", "practical", "writing", "ready"] },
+        "committeeMembers": { "type": "array", "items": { "type": "string" } },
+        "finalThesisUrl": { "type": "string" },
+        "finalThesisSentAt": { "type": "string", "format": "date-time" },
+        "problems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["no_response", "absence", "delay", "technical", "data_lack", "other"] },
+              "date": { "type": "string", "format": "date" },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "abandonmentRequest": {
+          "type": "object",
+          "properties": {
+            "reason": { "type": "string", "enum": ["no_commitment", "repeated_absence", "interruption", "work_pressure", "administrative", "other"] },
+            "date": { "type": "string", "format": "date" },
+            "notes": { "type": "string" },
+            "status": { "type": "string", "enum": ["pending", "approved", "rejected"] }
+          }
+        }
+      },
+      "required": ["id", "title", "status"]
+    },
+    "FieldVisit": {
+      "title": "FieldVisit",
+      "description": "A pedagogical field visit request.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "companyName": { "type": "string" },
+        "levelId": { "type": "string" },
+        "specialtyId": { "type": "string" },
+        "moduleId": { "type": "string" },
+        "visitDate": { "type": "string", "format": "date" },
+        "studentCount": { "type": "number" },
+        "supervisors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" }
+            }
+          }
+        },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "academicYear": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "teacherId", "companyName", "visitDate", "status"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "System operation logs.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "action": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "details": { "type": "object" }
+      },
+      "required": ["id", "userId", "action", "timestamp"]
+    },
+    "Student": {
+      "title": "Student",
+      "description": "A graduating student.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "registrationNumber": { "type": "string" },
+        "specialtyId": { "type": "string" },
+        "levelId": { "type": "string" },
+        "projectId": { "type": "string", "description": "ID of the assigned project" },
+        "isInternational": { "type": "boolean" }
+      },
+      "required": ["id", "name", "registrationNumber", "specialtyId", "levelId"]
+    },
+    "DepartmentStats": {
+      "title": "DepartmentStats",
+      "description": "Annual department statistics managed by Head of Department.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "academicYear": { "type": "string" },
+        "internationalStudentsCount": { "type": "number" },
+        "amphitheatersCount": { "type": "number" },
+        "tdRoomsCount": { "type": "number" },
+        "tpRoomsCount": { "type": "number" },
+        "tpComputersCount": { "type": "number" },
+        "labSeatsCount": { "type": "number" },
+        "consumablesSufficiency": { "type": "number" },
+        "teachesAI": { "type": "boolean" },
+        "teachesEntrepreneurship": { "type": "boolean" },
+        "itEngineersCount": { "type": "number" },
+        "itTechniciansCount": { "type": "number" },
+        "adminWorkersCount": { "type": "number" },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "academicYear"]
+    },
+    "OvertimeEntry": {
+      "title": "OvertimeEntry",
+      "description": "A record of overtime hours submitted by a teacher.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "academicYear": { "type": "string" },
+        "semester": { "type": "string", "enum": ["S1", "S2"] },
+        "date": { "type": "string", "format": "date" },
+        "hours": { "type": "number" },
+        "type": { "type": "string", "enum": ["internal", "external"] },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "submittedAt": { "type": "string", "format": "date-time" },
+        "reviewedAt": { "type": "string", "format": "date-time" },
+        "reviewedBy": { "type": "string" },
+        "rejectionReason": { "type": "string" }
+      },
+      "required": ["id", "teacherId", "academicYear", "hours", "status"]
+    },
+    "Certificate": {
+      "title": "Certificate",
+      "description": "A certificate issued to a teacher.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "type": { "type": "string", "enum": ["teaching", "supervision"] },
+        "academicYear": { "type": "string" },
+        "issuedAt": { "type": "string", "format": "date-time" },
+        "details": { "type": "object" }
+      },
+      "required": ["id", "teacherId", "type", "academicYear", "issuedAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "A system notification for administrators.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "teacherName": { "type": "string" },
+        "certificateId": { "type": "string" },
+        "certificateType": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "read": { "type": "boolean" }
+      },
+      "required": ["id", "type", "timestamp", "read"]
+    },
+    "Setting": {
+      "title": "Setting",
+      "description": "System-wide settings and configuration.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "url": { "type": "string" },
+        "type": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": { "schema": "User", "description": "User profiles and roles." },
+    "/specialties/{id}": { "schema": "Specialty", "description": "Department specialties." },
+    "/levels/{id}": { "schema": "Level", "description": "Pedagogical levels." },
+    "/modules/{id}": { "schema": "Module", "description": "Teaching modules." },
+    "/schedules/{id}": { "schema": "Schedule", "description": "Imported schedules." },
+    "/calendars/{id}": { "schema": "Calendar", "description": "Teaching calendars." },
+    "/sessions/{id}": { "schema": "Session", "description": "Individual teaching sessions." },
+    "/compensations/{id}": { "schema": "Compensation", "description": "Compensation requests." },
+    "/projects/{id}": { "schema": "Project", "description": "Graduation projects." },
+    "/students/{id}": { "schema": "Student", "description": "Graduating students." },
+    "/auditLogs/{id}": { "schema": "AuditLog", "description": "System logs." },
+    "/department_stats/{id}": { "schema": "DepartmentStats", "description": "Department annual statistics." },
+    "/overtime_entries/{id}": { "schema": "OvertimeEntry", "description": "Teacher overtime submissions." },
+    "/certificates/{id}": { "schema": "Certificate", "description": "Issued certificates." },
+    "/field_visits/{id}": { "schema": "FieldVisit", "description": "Pedagogical field visit requests." },
+    "/notifications/{id}": { "schema": "Notification", "description": "System notifications." },
+    "/settings/{id}": { "schema": "Setting", "description": "System configuration." }
+  }
+}

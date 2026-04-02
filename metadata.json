@@ -1,0 +1,5 @@
+{
+  "name": "MechEng Manager",
+  "description": "A comprehensive web application for managing the pedagogical activities of the Mechanical Engineering Department, including teacher management (permanent and temporary), automated teaching tracking, multi-type schedule management (semester, exams, hall utilization), overtime calculation, and graduation project monitoring with role-based access control.",
+  "requestFramePermissions": []
+}

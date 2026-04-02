@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // دالة للتحقق من أن الشخص هو المدير الفعلي (لأنه مسجل عبر Google)
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == "t.mansouri@lagh-univ.dz" ||
+        request.auth.token.email == "taharmansouri32@gmail.com"
+      );
+    }
+
+    // 1- حماية ملفات الإدارة (المستخدمون، التخصصات، الإعدادات، الجداول المرفوعة)
+    // لا يمكن لأي شخص (هاكر أو مستخدم مجهول) حذف أو تعديل هذه الملفات، فقط المدير!
+    // يمكن للجميع "قراءتها" فقط لكي يعمل الموقع (مثل التحقق من كلمة مرور الأستاذ).
+    match /users/{userId} {
+      allow read: if true; 
+      allow write: if isAdmin();
+    }
+    match /specialties/{docId} { allow read: if true; allow write: if isAdmin(); }
+    match /levels/{docId} { allow read: if true; allow write: if isAdmin(); }
+    match /modules/{docId} { allow read: if true; allow write: if isAdmin(); }
+    match /schedules/{docId} { allow read: if true; allow write: if isAdmin(); }
+    match /calendars/{docId} { allow read: if true; allow write: if isAdmin(); }
+    match /settings/{docId} { allow read: if true; allow write: if isAdmin(); }
+    match /system_settings/{docId} { allow read: if true; allow write: if isAdmin(); }
+    match /department_stats/{docId} { allow read: if true; allow write: if isAdmin(); }
+    
+    // 2- صلاحيات الأساتذة (الجلسات، التعويضات، المشاريع، الطلاب)
+    // بما أن الأستاذ غير مسجل في Firebase، فنحن مضطرون لفتح التعديل والإضافة للجميع
+    // لكننا سنمنع الحذف! الحذف النهائي محصور للمدير فقط كطبقة حماية إضافية.
+    match /sessions/{docId} { 
+      allow read, create, update: if true; 
+      allow delete: if isAdmin(); 
+    }
+    match /compensations/{docId} { 
+      allow read, create, update: if true; 
+      allow delete: if isAdmin(); 
+    }
+    match /projects/{docId} { 
+      allow read, create, update: if true; 
+      allow delete: if isAdmin(); 
+    }
+    match /students/{docId} { 
+      allow read, create, update: if true; 
+      allow delete: if isAdmin(); 
+    }
+    match /overtime_entries/{docId} { 
+      allow read, create, update: if true; 
+      allow delete: if isAdmin(); 
+    }
+    match /certificates/{docId} { 
+      allow read, create, update: if true; 
+      allow delete: if isAdmin(); 
+    }
+    match /field_visits/{docId} { 
+      allow read, create, update: if true; 
+      allow delete: if isAdmin();
+    }
+    match /notifications/{docId} { 
+      allow read, create, update: if true; 
+      allow delete: if isAdmin();
+    }
+    match /auditLogs/{docId} { 
+      allow read, create: if true; 
+      allow update, delete: if isAdmin(); // سجل التدقيق للقراءة والكتابة، ولا يُعدّل!
+    }
+
+  }
+}
